@@ -91,6 +91,20 @@ def reportKeywords(aggregations, mdString):
     return mdString
 
 
+def reportPublicationTypes(aggregations, mdString):
+    """Report publication type info"""
+    type = aggregations["type"]
+    outTable = iterateAggregation(type)
+
+    # Create summary table
+    tableHeader = ['Publication type', 'Number of publications']
+
+    mdString += '\n\n## Publication types\n\n'
+    mdString += tabulate(outTable, tableHeader, tablefmt='pipe')
+
+    return mdString
+
+
 def report(fileIn):
     """Create report from JSON file"""
 
@@ -105,6 +119,7 @@ def report(fileIn):
     mdString = reportAccessRights(aggregations, mdString)
     mdString = reportFileTypes(aggregations, mdString)
     mdString = reportKeywords(aggregations, mdString)
+    mdString = reportPublicationTypes(aggregations, mdString)
 
     print(mdString)
 
