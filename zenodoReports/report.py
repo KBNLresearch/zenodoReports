@@ -49,7 +49,7 @@ def iterateAggregation(aggregation):
     return outTable
 
 
-def reportAccessRights(aggregations, mdString):
+def reportAccessRights(aggregations):
     """Report access right info"""
     access_right = aggregations["access_right"]
     outTable = iterateAggregation(access_right)
@@ -57,13 +57,13 @@ def reportAccessRights(aggregations, mdString):
     # Create summary table
     tableHeader = ['Access type', 'Number of publications']
 
-    mdString += '\n\n## Access rights\n\n'
+    mdString = '\n\n## Access rights\n\n'
     mdString += tabulate(outTable, tableHeader, tablefmt='pipe')
 
     return mdString
 
 
-def reportFileTypes(aggregations, mdString):
+def reportFileTypes(aggregations):
     """Report file type info"""
     file_type = aggregations["file_type"]
     outTable = iterateAggregation(file_type)
@@ -71,13 +71,13 @@ def reportFileTypes(aggregations, mdString):
     # Create summary table
     tableHeader = ['File type', 'Number of files']
 
-    mdString += '\n\n## File types\n\n'
+    mdString = '\n\n## File types\n\n'
     mdString += tabulate(outTable, tableHeader, tablefmt='pipe')
 
     return mdString
 
 
-def reportKeywords(aggregations, mdString):
+def reportKeywords(aggregations):
     """Report keyword info"""
     keywords = aggregations["keywords"]
     outTable = iterateAggregation(keywords)
@@ -85,13 +85,13 @@ def reportKeywords(aggregations, mdString):
     # Create summary table
     tableHeader = ['Keyword', 'Number of publications']
 
-    mdString += '\n\n## Keywords\n\n'
+    mdString = '\n\n## Keywords\n\n'
     mdString += tabulate(outTable, tableHeader, tablefmt='pipe')
 
     return mdString
 
 
-def reportPublicationTypes(aggregations, mdString):
+def reportPublicationTypes(aggregations):
     """Report publication type info"""
     type = aggregations["type"]
     outTable = iterateAggregation(type)
@@ -99,7 +99,7 @@ def reportPublicationTypes(aggregations, mdString):
     # Create summary table
     tableHeader = ['Publication type', 'Number of publications']
 
-    mdString += '\n\n## Publication types\n\n'
+    mdString = '\n\n## Publication types\n\n'
     mdString += tabulate(outTable, tableHeader, tablefmt='pipe')
 
     return mdString
@@ -109,17 +109,83 @@ def report(fileIn):
     """Create report from JSON file"""
 
     # Initialize empty string for Markdown output
-    mdString = ""
+    reportString = ""
 
     # Read JSON file
     with open(fileIn, 'r') as f:
         dataIn = json.load(f)
 
+    # Report aggregated statistics
     aggregations = dataIn["aggregations"]
-    mdString = reportAccessRights(aggregations, mdString)
-    mdString = reportFileTypes(aggregations, mdString)
-    mdString = reportKeywords(aggregations, mdString)
-    mdString = reportPublicationTypes(aggregations, mdString)
+    mdString = reportAccessRights(aggregations)
+    reportString += mdString
+    mdString = reportFileTypes(aggregations)
+    reportString += mdString
+    mdString = reportKeywords(aggregations)
+    reportString += mdString
+    mdString = reportPublicationTypes(aggregations)
+    reportString += mdString
+ 
+    # Report detailed statistics from individual hits
+    hits = dataIn["hits"]["hits"]
+    createdDates = []
+    fileTypes = []
+    accessRights = []
+    keyWords = []
+    languages = []
+    licenses = []
+    publicationDates = []
+    resourceTypes = []
+    resourceSubtypes = []
 
-    print(mdString)
+    for hit in hits:
+        created = hit["created"]
+        createdDates.append(created)
+        try:
+            files = hit["files"]
+        except KeyError:
+            # Closed access publications can have no files
+            files = []
+        for file in files:
+            ftype = file["type"]
+            fileTypes.append(ftype)
+        metadata = hit["metadata"]
+        access_right = metadata["access_right"]
+        accessRights.append(access_right)
+        try:
+            keywords = metadata["keywords"]
+        except KeyError:
+            keywords = []
+        for keyword in keywords:
+            keyWords.append(keyword)
+        try:
+            language = metadata["language"]
+            languages.append(language)
+        except KeyError:
+            languages.append("N/A")
+        try:
+            license = metadata["license"]["id"]
+            licenses.append(license)
+        except KeyError:
+            licenses.append("N/A")
+        try:
+            publicationDate = metadata["publication_date"]
+            publicationDates.append(publicationDate)
+        except KeyError:
+            publicationDates.append("N/A")
+        resource_type = metadata["resource_type"]
+        
+        try:
+            type = resource_type["type"]
+            resourceTypes.append(type)
+        except KeyError:
+            pass
+        try:
+            subtype = resource_type["subtype"]
+            resourceSubtypes.append(subtype)
+        except KeyError:
+            pass
+
+    for lan in publicationDates:
+        print(lan)
 
