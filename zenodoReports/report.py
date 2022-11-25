@@ -31,11 +31,11 @@ def dfToMarkdown(dataframe, headers='keys'):
     mdOut = dataframe.pipe(tabulate, headers=headers, tablefmt='pipe')
     return mdOut
 
-def reportAccessRights(aggregations, mdString):
-    """Report access right info"""
-    access_right = aggregations["access_right"]
-    buckets = access_right["buckets"]
-    countOther = access_right["sum_other_doc_count"]
+
+def iterateAggregation(aggregation):
+    """Iterate over aggregation elements and return output table as list"""
+    buckets = aggregation["buckets"]
+    countOther = aggregation["sum_other_doc_count"]
 
     outTable = []
 
@@ -46,8 +46,15 @@ def reportAccessRights(aggregations, mdString):
 
     outTable.append(['other', countOther])
 
-    # Create summary table
+    return outTable
 
+
+def reportAccessRights(aggregations, mdString):
+    """Report access right info"""
+    access_right = aggregations["access_right"]
+    outTable = iterateAggregation(access_right)
+
+    # Create summary table
     tableHeader = ['Access type', 'number of publications']
 
     mdString += '\n\n## Access rights\n\n'
@@ -59,20 +66,9 @@ def reportAccessRights(aggregations, mdString):
 def reportFileType(aggregations, mdString):
     """Report file type info"""
     file_type = aggregations["file_type"]
-    buckets = file_type["buckets"]
-    countOther = file_type["sum_other_doc_count"]
-
-    outTable = []
-
-    for bucket in buckets:
-        doc_count = bucket["doc_count"]
-        key = bucket["key"]
-        outTable.append([key, doc_count])
-
-    outTable.append(['other', countOther])
+    outTable = iterateAggregation(file_type)
 
     # Create summary table
-
     tableHeader = ['File type', 'number of files']
 
     mdString += '\n\n## File types\n\n'
