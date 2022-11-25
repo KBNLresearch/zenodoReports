@@ -55,7 +55,7 @@ def reportAccessRights(aggregations, mdString):
     outTable = iterateAggregation(access_right)
 
     # Create summary table
-    tableHeader = ['Access type', 'number of publications']
+    tableHeader = ['Access type', 'Number of publications']
 
     mdString += '\n\n## Access rights\n\n'
     mdString += tabulate(outTable, tableHeader, tablefmt='pipe')
@@ -63,15 +63,29 @@ def reportAccessRights(aggregations, mdString):
     return mdString
 
 
-def reportFileType(aggregations, mdString):
+def reportFileTypes(aggregations, mdString):
     """Report file type info"""
     file_type = aggregations["file_type"]
     outTable = iterateAggregation(file_type)
 
     # Create summary table
-    tableHeader = ['File type', 'number of files']
+    tableHeader = ['File type', 'Number of files']
 
     mdString += '\n\n## File types\n\n'
+    mdString += tabulate(outTable, tableHeader, tablefmt='pipe')
+
+    return mdString
+
+
+def reportKeywords(aggregations, mdString):
+    """Report keyword info"""
+    keywords = aggregations["keywords"]
+    outTable = iterateAggregation(keywords)
+
+    # Create summary table
+    tableHeader = ['Keyword', 'Number of publications']
+
+    mdString += '\n\n## Keywords\n\n'
     mdString += tabulate(outTable, tableHeader, tablefmt='pipe')
 
     return mdString
@@ -89,8 +103,8 @@ def report(fileIn):
 
     aggregations = dataIn["aggregations"]
     mdString = reportAccessRights(aggregations, mdString)
-
-    mdString = reportFileType(aggregations, mdString)
+    mdString = reportFileTypes(aggregations, mdString)
+    mdString = reportKeywords(aggregations, mdString)
 
     print(mdString)
 
