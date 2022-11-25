@@ -28,6 +28,7 @@ INSTALL_REQUIRES = [
     'setuptools',
     'pandas',
     'matplotlib',
+    'markdown',
     'tabulate'
 ]
 

@@ -8,6 +8,7 @@ import json
 import sys
 import argparse
 from . import fetch
+from . import report
 
 __version__ = "0.1.0a1"
 
@@ -81,7 +82,7 @@ def main():
 
     elif action == "report":
         metadataIn = args.metadataIn
-        pass
+        report.report(metadataIn)
     elif action is None:
         printHelpAndExit()
 
