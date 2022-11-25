@@ -105,6 +105,34 @@ def reportPublicationTypes(aggregations):
     return mdString
 
 
+def reportCreatedDates(createdDates):
+    """Report created dates info"""
+    cDates = []
+    # First convert everything to datetime values
+    for createdDate in createdDates:
+        cDates.append(datetime.datetime.fromisoformat(createdDate))
+    
+    # Sort dates and get lower/upper bounds
+    cDates.sort()
+    dateMin = cDates[0]
+    dateMax = cDates[len(cDates) - 1]
+
+    # TODO:
+    #
+    # - Create list of all months between dateMin and dateMax
+    # - For each month, count number of publications created that month
+    # - Report as bar chart, table, CSV
+ 
+    print(dateMin, dateMax)
+
+
+def reportPublicationDates(publicationDates):
+    """Report publication dates info"""
+    pubDates = []
+    for publicationDate in publicationDates:
+        pubDates.append(datetime.date.fromisoformat(publicationDate))
+    print(pubDates)
+
 def report(fileIn):
     """Create report from JSON file"""
 
@@ -186,6 +214,8 @@ def report(fileIn):
         except KeyError:
             pass
 
-    for lan in publicationDates:
-        print(lan)
+    reportCreatedDates(createdDates)
+    #reportPublicationDates(publicationDates)
+    #for lan in createdDates:
+    #    print(lan)
 
