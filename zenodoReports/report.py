@@ -25,8 +25,8 @@ params = {'legend.fontsize': 'large',
           'figure.figsize': (16, 9),
          'axes.labelsize': '18',
          'axes.titlesize':'large',
-         'xtick.labelsize':'large',
-         'ytick.labelsize':'large'}
+         'xtick.labelsize':'x-large',
+         'ytick.labelsize':'x-large'}
 pylab.rcParams.update(params)
 
 def dfToMarkdown(dataframe, headers='keys'):
@@ -166,39 +166,37 @@ def reportCreatedDates(createdDates):
     cDatesFrame = pd.DataFrame({'date': createdRange,
                                 'noPubs': createdCounts,
                                 'noPubsCum': createdCountsCum})
-    #cDatesFrame['date'] = pd.to_datetime(pd.to_datetime(cDatesFrame.date))
 
-    pubsPlot = cDatesFrame.plot(kind='bar',
+    # Note: setting 'kind' to 'box' below results in weird
+    # behaviour of date_form (all years are set to 1970!)
+    # Might be related to this bug: https://github.com/pandas-dev/pandas/issues/26253
+
+    pubsPlot = cDatesFrame.plot(kind='line',
                                 x='date',
-                                y='noPubs',
+                                y='noPubsCum',
                                 lw=2.5,
                                 figsize=(16,9))
 
-    #date_form = DateFormatter("%Y-%m")
-    #pubsPlot.axes.xaxis.set_major_formatter(date_form)
+    date_form = DateFormatter("%Y-%m")
+    pubsPlot.axes.xaxis.set_major_formatter(date_form)
 
-    locator = mdates.AutoDateLocator(minticks = 20, maxticks = 30)
-    #locator = mdates.AutoDateLocator()
+    locator = mdates.AutoDateLocator(minticks = 16, maxticks = 24)
     formatter = mdates.ConciseDateFormatter(locator)
     formatter.formats = ['%Y', '%b', '%d']
 
     pubsPlot.axes.xaxis.set_major_locator(locator)
     pubsPlot.axes.xaxis.set_major_formatter(formatter)
 
-    pubsPlot.set_xlabel('Date')
-    pubsPlot.set_ylabel('Submitted publications')
-
+    pubsPlot.set_xlabel('Datum')
+    pubsPlot.set_ylabel('Publicaties (cumulatief)')
+    pubsPlot.set_xlim([datetime.date(yearMin, 1, 1), datetime.date(yearMax, 12, 31)])
+    pubsPlot.get_legend().remove()
     fig = pubsPlot.get_figure()
-    fig.savefig(os.path.join(dirImg, 'pubsByDate.png'))
+    fig.savefig(os.path.join(dirImg, 'pubsTimeCum.png'))
 
-    cDatesFrame.to_csv(os.path.join(dirCSV, 'pubsByDate.csv'), encoding='utf-8', index=False)
-
-
-    # TODO:
-    #
-    # - Report as bar chart, table, CSV
+    # Export data frame to a CSV file
+    cDatesFrame.to_csv(os.path.join(dirCSV, 'pubsTime.csv'), encoding='utf-8', index=False)
  
-
 
 def reportPublicationDates(publicationDates):
     """Report publication dates info"""
