@@ -10,21 +10,24 @@ import shutil
 import codecs
 import json
 import datetime
+from dateutil import rrule
 import pandas as pd
 import numpy as np
 from matplotlib import pylab
+from matplotlib import pyplot as plt
+from matplotlib import dates as mdates
+from matplotlib.dates import DateFormatter
 import markdown
 from tabulate import tabulate
 
 # Set defaults for pyplot
-params = {'legend.fontsize': 'x-large',
-          'figure.figsize': (8, 6),
+params = {'legend.fontsize': 'large',
+          'figure.figsize': (16, 9),
          'axes.labelsize': '18',
-         'axes.titlesize':'x-large',
-         'xtick.labelsize':'x-large',
-         'ytick.labelsize':'x-large'}
+         'axes.titlesize':'large',
+         'xtick.labelsize':'large',
+         'ytick.labelsize':'large'}
 pylab.rcParams.update(params)
-
 
 def dfToMarkdown(dataframe, headers='keys'):
     """Convert Data Frame to Markdown table with optionally custom headers"""
@@ -108,22 +111,93 @@ def reportPublicationTypes(aggregations):
 def reportCreatedDates(createdDates):
     """Report created dates info"""
     cDates = []
-    # First convert everything to datetime values
+    # First convert ISO datetime strings to date values
     for createdDate in createdDates:
-        cDates.append(datetime.datetime.fromisoformat(createdDate))
+        cDates.append(datetime.datetime.fromisoformat(createdDate).date())
     
     # Sort dates and get lower/upper bounds
     cDates.sort()
-    dateMin = cDates[0]
-    dateMax = cDates[len(cDates) - 1]
+    yearMin = cDates[0].year
+    monthMin = cDates[0].month
+    yearMax = cDates[len(cDates) - 1].year
+    monthMax = cDates[len(cDates) - 1].month
+
+    # List of all months between dateMin and dateMax
+    createdRange = []
+
+    year = yearMin
+    month = monthMin
+
+    while year <= yearMax:
+        myDate = datetime.date(year, month, 1)
+        createdRange.append(myDate)
+        if year == yearMax:
+            if month < monthMax:
+                month += 1
+            else:
+                # Increase year index to force break from loop
+                year += 1
+        else:
+            month +=1
+        if month > 12:
+            month = 1
+            year += 1
+
+        createdCounts = []
+        createdCountsCum = []
+
+    countCumPrev = 0
+
+    # For each month in createdRange, count number of publications
+    # and keep track of cumulative count
+    for created in createdRange:
+        count = 0
+        for date in cDates:
+            if date.year == created.year and date.month == created.month:
+                count += 1
+        createdCounts.append(count)
+        countCum = countCumPrev + count
+        createdCountsCum.append(countCum)
+        countCumPrev = countCum
+
+    dirImg = "."
+    dirCSV = "."
+
+    cDatesFrame = pd.DataFrame({'date': createdRange,
+                                'noPubs': createdCounts,
+                                'noPubsCum': createdCountsCum})
+    #cDatesFrame['date'] = pd.to_datetime(pd.to_datetime(cDatesFrame.date))
+
+    pubsPlot = cDatesFrame.plot(kind='bar',
+                                x='date',
+                                y='noPubs',
+                                lw=2.5,
+                                figsize=(16,9))
+
+    #date_form = DateFormatter("%Y-%m")
+    #pubsPlot.axes.xaxis.set_major_formatter(date_form)
+
+    locator = mdates.AutoDateLocator(minticks = 20, maxticks = 30)
+    #locator = mdates.AutoDateLocator()
+    formatter = mdates.ConciseDateFormatter(locator)
+    formatter.formats = ['%Y', '%b', '%d']
+
+    pubsPlot.axes.xaxis.set_major_locator(locator)
+    pubsPlot.axes.xaxis.set_major_formatter(formatter)
+
+    pubsPlot.set_xlabel('Date')
+    pubsPlot.set_ylabel('Submitted publications')
+
+    fig = pubsPlot.get_figure()
+    fig.savefig(os.path.join(dirImg, 'pubsByDate.png'))
+
+    cDatesFrame.to_csv(os.path.join(dirCSV, 'pubsByDate.csv'), encoding='utf-8', index=False)
+
 
     # TODO:
     #
-    # - Create list of all months between dateMin and dateMax
-    # - For each month, count number of publications created that month
     # - Report as bar chart, table, CSV
  
-    print(dateMin, dateMax)
 
 
 def reportPublicationDates(publicationDates):
@@ -215,7 +289,4 @@ def report(fileIn):
             pass
 
     reportCreatedDates(createdDates)
-    #reportPublicationDates(publicationDates)
-    #for lan in createdDates:
-    #    print(lan)
 
