@@ -109,8 +109,72 @@ def reportPublicationTypes(aggregations):
     return mdString
 
 
+def frequenciesByMonth(datesIn):
+    """Takes list of datetime strings, and returns data frame
+    with frequencies and cumulative frequencies by month"""
+
+    dates = []
+    # First convert ISO datetime strings to date values
+    for dateIn in datesIn:
+        dates.append(datetime.datetime.fromisoformat(dateIn).date())
+    
+    # Sort dates and get lower/upper bounds
+    dates.sort()
+    yearMin = dates[0].year
+    monthMin = dates[0].month
+    yearMax = dates[len(dates) - 1].year
+    monthMax = dates[len(dates) - 1].month
+
+    # List of all months between dateMin and dateMax
+    dateRange = []
+
+    year = yearMin
+    month = monthMin
+
+    while year <= yearMax:
+        myDate = datetime.date(year, month, 1)
+        dateRange.append(myDate)
+        if year == yearMax:
+            if month < monthMax:
+                month += 1
+            else:
+                # Increase year index to force break from loop
+                year += 1
+        else:
+            month +=1
+        if month > 12:
+            month = 1
+            year += 1
+
+        dateCounts = []
+        dateCountsCum = []
+
+    countCumPrev = 0
+
+    # For each month in dateRange, count number of dates
+    # and keep track of cumulative count
+    for month in dateRange:
+        count = 0
+        for date in dates:
+            if date.year == month.year and date.month == month.month:
+                count += 1
+        dateCounts.append(count)
+        countCum = countCumPrev + count
+        dateCountsCum.append(countCum)
+        countCumPrev = countCum
+
+    datesFrame = pd.DataFrame({'date': dateRange,
+                                'freq': dateCounts,
+                                'freqCum': dateCountsCum})
+
+    return datesFrame, yearMin, yearMax
+
+
 def reportCreatedDates(createdDates):
     """Report created dates info"""
+
+    cDatesFrame, yearMin, yearMax = frequenciesByMonth(createdDates)
+    """
     cDates = []
     # First convert ISO datetime strings to date values
     for createdDate in createdDates:
@@ -165,13 +229,14 @@ def reportCreatedDates(createdDates):
                                 'noPubs': createdCounts,
                                 'noPubsCum': createdCountsCum})
 
+    """   
     # Note: setting 'kind' to 'box' below results in weird
     # behaviour of date_form (all years are set to 1970!)
     # Might be related to this bug: https://github.com/pandas-dev/pandas/issues/26253
 
     pubsPlot = cDatesFrame.plot(kind='line',
                                 x='date',
-                                y='noPubsCum',
+                                y='freqCum',
                                 lw=2.5,
                                 figsize=(16,9))
 
