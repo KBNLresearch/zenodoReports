@@ -170,95 +170,56 @@ def frequenciesByMonth(datesIn):
     return datesFrame, yearMin, yearMax
 
 
-def reportCreatedDates(createdDates):
-    """Report created dates info"""
-
-    cDatesFrame, yearMin, yearMax = frequenciesByMonth(createdDates)
-    """
-    cDates = []
-    # First convert ISO datetime strings to date values
-    for createdDate in createdDates:
-        cDates.append(datetime.datetime.fromisoformat(createdDate).date())
-    
-    # Sort dates and get lower/upper bounds
-    cDates.sort()
-    yearMin = cDates[0].year
-    monthMin = cDates[0].month
-    yearMax = cDates[len(cDates) - 1].year
-    monthMax = cDates[len(cDates) - 1].month
-
-    # List of all months between dateMin and dateMax
-    createdRange = []
-
-    year = yearMin
-    month = monthMin
-
-    while year <= yearMax:
-        myDate = datetime.date(year, month, 1)
-        createdRange.append(myDate)
-        if year == yearMax:
-            if month < monthMax:
-                month += 1
-            else:
-                # Increase year index to force break from loop
-                year += 1
-        else:
-            month +=1
-        if month > 12:
-            month = 1
-            year += 1
-
-        createdCounts = []
-        createdCountsCum = []
-
-    countCumPrev = 0
-
-    # For each month in createdRange, count number of publications
-    # and keep track of cumulative count
-    for created in createdRange:
-        count = 0
-        for date in cDates:
-            if date.year == created.year and date.month == created.month:
-                count += 1
-        createdCounts.append(count)
-        countCum = countCumPrev + count
-        createdCountsCum.append(countCum)
-        countCumPrev = countCum
-
-    cDatesFrame = pd.DataFrame({'date': createdRange,
-                                'noPubs': createdCounts,
-                                'noPubsCum': createdCountsCum})
-
-    """   
-    # Note: setting 'kind' to 'box' below results in weird
-    # behaviour of date_form (all years are set to 1970!)
-    # Might be related to this bug: https://github.com/pandas-dev/pandas/issues/26253
-
-    pubsPlot = cDatesFrame.plot(kind='line',
-                                x='date',
-                                y='freqCum',
+def plotDfTime(dataFrame, xCol, yCol, xLabel, yLabel, yearMin, yearMax, imageOut):
+    """Plot time-based data frame"""
+    myPlot = dataFrame.plot(kind='line',
+                                x=xCol,
+                                y=yCol,
                                 lw=2.5,
                                 figsize=(16,9))
 
+    # Note: setting 'kind' to 'box' babove results in weird
+    # behaviour if date_form is used (all years are set to 1970)!
+    # Might be related to this bug: https://github.com/pandas-dev/pandas/issues/26253
+
     date_form = DateFormatter("%Y-%m")
-    pubsPlot.axes.xaxis.set_major_formatter(date_form)
+    myPlot.axes.xaxis.set_major_formatter(date_form)
 
     locator = mdates.AutoDateLocator(minticks = 16, maxticks = 24)
     formatter = mdates.ConciseDateFormatter(locator)
     formatter.formats = ['%Y', '%b', '%d']
 
-    pubsPlot.axes.xaxis.set_major_locator(locator)
-    pubsPlot.axes.xaxis.set_major_formatter(formatter)
+    myPlot.axes.xaxis.set_major_locator(locator)
+    myPlot.axes.xaxis.set_major_formatter(formatter)
 
-    pubsPlot.set_xlabel('Datum')
-    pubsPlot.set_ylabel('Publicaties (cumulatief)')
-    pubsPlot.set_xlim([datetime.date(yearMin, 1, 1), datetime.date(yearMax, 12, 31)])
-    pubsPlot.get_legend().remove()
-    fig = pubsPlot.get_figure()
-    fig.savefig(os.path.join(config.dirImg, 'pubsTimeCum.png'))
+    myPlot.set_xlabel(xLabel)
+    myPlot.set_ylabel(yLabel)
+    myPlot.set_xlim([datetime.date(yearMin, 1, 1), datetime.date(yearMax, 12, 31)])
+    myPlot.get_legend().remove()
+    fig = myPlot.get_figure()
+    fig.savefig(imageOut)
+
+
+def reportCreatedDates(createdDates):
+    """Report created dates info"""
+
+    # Analyse created dates
+    cDatesFrame, yearMin, yearMax = frequenciesByMonth(createdDates)
 
     # Export data frame to a CSV file
     cDatesFrame.to_csv(os.path.join(config.dirCSV, 'pubsTime.csv'), encoding='utf-8', index=False)
+
+    # Plot frequencies
+    xLabel = 'Datum'
+    yLabel = 'Publicaties'
+    imageOut = os.path.join(config.dirImg, 'publicaties-tijd.png')
+    plotDfTime(cDatesFrame, 'date', 'freq', xLabel, yLabel, yearMin, yearMax, imageOut)
+
+    # Plot cumulative frequencies
+    xLabel = 'Datum'
+    yLabel = 'Publicaties (cumulatief)'
+    imageOut = os.path.join(config.dirImg, 'publicaties-tijd-cum.png')
+    plotDfTime(cDatesFrame, 'date', 'freqCum', xLabel, yLabel, yearMin, yearMax, imageOut)
  
 
 def reportPublicationDates(publicationDates):
@@ -267,6 +228,7 @@ def reportPublicationDates(publicationDates):
     for publicationDate in publicationDates:
         pubDates.append(datetime.date.fromisoformat(publicationDate))
     print(pubDates)
+
 
 def report(fileIn):
     """Create report from JSON file"""
