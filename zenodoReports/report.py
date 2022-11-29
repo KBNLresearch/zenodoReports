@@ -19,6 +19,7 @@ from matplotlib import dates as mdates
 from matplotlib.dates import DateFormatter
 import markdown
 from tabulate import tabulate
+from . import config
 
 # Set defaults for pyplot
 params = {'legend.fontsize': 'large',
@@ -160,9 +161,6 @@ def reportCreatedDates(createdDates):
         createdCountsCum.append(countCum)
         countCumPrev = countCum
 
-    dirImg = "."
-    dirCSV = "."
-
     cDatesFrame = pd.DataFrame({'date': createdRange,
                                 'noPubs': createdCounts,
                                 'noPubsCum': createdCountsCum})
@@ -192,10 +190,10 @@ def reportCreatedDates(createdDates):
     pubsPlot.set_xlim([datetime.date(yearMin, 1, 1), datetime.date(yearMax, 12, 31)])
     pubsPlot.get_legend().remove()
     fig = pubsPlot.get_figure()
-    fig.savefig(os.path.join(dirImg, 'pubsTimeCum.png'))
+    fig.savefig(os.path.join(config.dirImg, 'pubsTimeCum.png'))
 
     # Export data frame to a CSV file
-    cDatesFrame.to_csv(os.path.join(dirCSV, 'pubsTime.csv'), encoding='utf-8', index=False)
+    cDatesFrame.to_csv(os.path.join(config.dirCSV, 'pubsTime.csv'), encoding='utf-8', index=False)
  
 
 def reportPublicationDates(publicationDates):
@@ -207,6 +205,32 @@ def reportPublicationDates(publicationDates):
 
 def report(fileIn):
     """Create report from JSON file"""
+
+    dirOut = os.path.join('.', 'report')
+    if not os.path.isdir(dirOut):
+        os.makedirs(dirOut)
+
+    config.dirCSS = os.path.join(dirOut, 'css')
+    config.dirCSV = os.path.join(dirOut, 'csv')
+    config.dirImg = os.path.join(dirOut, 'img')
+
+    if not os.path.isdir(config.dirCSS):
+        os.makedirs(config.dirCSS)
+
+    if not os.path.isdir(config.dirCSV):
+        os.makedirs(config.dirCSV)
+
+    if not os.path.isdir(config.dirImg):
+        os.makedirs(config.dirImg)
+
+    # Copy style sheet to CSS dir
+    try:
+        cssIn = os.path.join(sys.path[0], 'css', 'github-markdown.css')
+        cssOut = os.path.join(config.dirCSS, 'github-markdown.css')
+        shutil.copyfile(cssIn, cssOut)
+    except:
+        sys.stderr.write("Cannot copy style sheet\n")
+        sys.exit()
 
     # Initialize empty string for Markdown output
     reportString = ""
