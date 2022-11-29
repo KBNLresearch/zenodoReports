@@ -10,14 +10,12 @@ import shutil
 import codecs
 import json
 import datetime
-from dateutil import rrule
+from collections import Counter
 import pandas as pd
-import numpy as np
 from matplotlib import pylab
 from matplotlib import pyplot as plt
 from matplotlib import dates as mdates
 from matplotlib.dates import DateFormatter
-import markdown
 from tabulate import tabulate
 from . import config
 
@@ -29,6 +27,7 @@ params = {'legend.fontsize': 'large',
          'xtick.labelsize':'x-large',
          'ytick.labelsize':'x-large'}
 pylab.rcParams.update(params)
+
 
 def dfToMarkdown(dataframe, headers='keys'):
     """Convert Data Frame to Markdown table with optionally custom headers"""
@@ -53,59 +52,83 @@ def iterateAggregation(aggregation):
     return outTable
 
 
-def reportAccessRights(aggregations):
-    """Report access right info"""
-    access_right = aggregations["access_right"]
-    outTable = iterateAggregation(access_right)
+def countByValue(listIn):
+    """Report frequencies for values in a list"""
 
-    # Create summary table
-    tableHeader = ['Access type', 'Number of publications']
+    vCount = Counter(listIn)
+    vFrame = pd.DataFrame.from_dict(vCount, orient='index', columns=['frequency'])
+    vFrame.sort_values(by='frequency', ascending=False, inplace=True)
 
+    return vFrame
+
+
+def reportAccessRights(accessRights):
+    """Report access rights info"""
+
+    arFrame = countByValue(accessRights)
+    arMd = dfToMarkdown(arFrame, headers=['Access type', 'Count'])
     mdString = '\n\n## Access rights\n\n'
-    mdString += tabulate(outTable, tableHeader, tablefmt='pipe')
-
+    mdString += arMd
     return mdString
 
 
-def reportFileTypes(aggregations):
+def reportFileTypes(fileTypes):
     """Report file type info"""
-    file_type = aggregations["file_type"]
-    outTable = iterateAggregation(file_type)
 
-    # Create summary table
-    tableHeader = ['File type', 'Number of files']
-
+    ftFrame = countByValue(fileTypes)
+    ftMd = dfToMarkdown(ftFrame, headers=['File type', 'Count'])
     mdString = '\n\n## File types\n\n'
-    mdString += tabulate(outTable, tableHeader, tablefmt='pipe')
-
+    mdString += ftMd
     return mdString
 
 
-def reportKeywords(aggregations):
+def reportKeywords(keywords):
     """Report keyword info"""
-    keywords = aggregations["keywords"]
-    outTable = iterateAggregation(keywords)
 
-    # Create summary table
-    tableHeader = ['Keyword', 'Number of publications']
-
+    kwFrame = countByValue(keywords)
+    kwMd = dfToMarkdown(kwFrame, headers=['Keyword', 'Count'])
     mdString = '\n\n## Keywords\n\n'
-    mdString += tabulate(outTable, tableHeader, tablefmt='pipe')
-
+    mdString += kwMd
     return mdString
 
 
-def reportPublicationTypes(aggregations):
+def reportPublicationTypes(publicationTypes):
     """Report publication type info"""
-    type = aggregations["type"]
-    outTable = iterateAggregation(type)
 
-    # Create summary table
-    tableHeader = ['Publication type', 'Number of publications']
-
+    pTypeFrame = countByValue(publicationTypes)
+    pTypeMd = dfToMarkdown(pTypeFrame, headers=['Publication type', 'Count'])
     mdString = '\n\n## Publication types\n\n'
-    mdString += tabulate(outTable, tableHeader, tablefmt='pipe')
+    mdString += pTypeMd
+    return mdString
 
+
+def reportPublicationSubtypes(publicationSubtypes):
+    """Report publication subtype info"""
+
+    sTypeFrame = countByValue(publicationSubtypes)
+    sTypeMd = dfToMarkdown(sTypeFrame, headers=['Publication subtype', 'Count'])
+    mdString = '\n\n## Publication subtypes\n\n'
+    mdString += sTypeMd
+    return mdString
+
+
+def reportPublicationLanguages(publicationLanguages):
+    """Report publication language info"""
+
+    lTypeFrame = countByValue(publicationLanguages)
+    lTypeMd = dfToMarkdown(lTypeFrame, headers=['Publication language', 'Count'])
+    mdString = '\n\n## Publication languages\n\n'
+    mdString += lTypeMd
+    return mdString
+
+
+def reportPublicationLicenses(publicationLicenses):
+    """Report publication license info"""
+
+    licTypeFrame = countByValue(publicationLicenses)
+    licTypeMd = dfToMarkdown(licTypeFrame, headers=['Publication license', 'Count'])
+    mdString = '\n\n## Publication licenses\n\n'
+    mdString += licTypeMd
     return mdString
 
 
@@ -178,7 +201,7 @@ def plotDfTime(dataFrame, xCol, yCol, xLabel, yLabel, yearMin, yearMax, imageOut
                                 lw=2.5,
                                 figsize=(16,9))
 
-    # Note: setting 'kind' to 'box' babove results in weird
+    # Note: setting 'kind' to 'box' above results in weird
     # behaviour if date_form is used (all years are set to 1970)!
     # Might be related to this bug: https://github.com/pandas-dev/pandas/issues/26253
 
@@ -207,28 +230,55 @@ def reportCreatedDates(createdDates):
     cDatesFrame, yearMin, yearMax = frequenciesByMonth(createdDates)
 
     # Export data frame to a CSV file
-    cDatesFrame.to_csv(os.path.join(config.dirCSV, 'pubsTime.csv'), encoding='utf-8', index=False)
+    cDatesFrame.to_csv(os.path.join(config.dirCSV, 'createdDates.csv'), encoding='utf-8', index=False)
 
     # Plot frequencies
-    xLabel = 'Datum'
-    yLabel = 'Publicaties'
-    imageOut = os.path.join(config.dirImg, 'publicaties-tijd.png')
-    plotDfTime(cDatesFrame, 'date', 'freq', xLabel, yLabel, yearMin, yearMax, imageOut)
+    xLabel = 'Created date'
+    yLabel = 'Count'
+    imgCreated = os.path.join(config.dirImg, 'publications-created.png')
+    plotDfTime(cDatesFrame, 'date', 'freq', xLabel, yLabel, yearMin, yearMax, imgCreated)
 
     # Plot cumulative frequencies
-    xLabel = 'Datum'
-    yLabel = 'Publicaties (cumulatief)'
-    imageOut = os.path.join(config.dirImg, 'publicaties-tijd-cum.png')
-    plotDfTime(cDatesFrame, 'date', 'freqCum', xLabel, yLabel, yearMin, yearMax, imageOut)
- 
+    xLabel = 'Created date'
+    yLabel = 'Count (cumulative)'
+    imgCreatedCum = os.path.join(config.dirImg, 'publications-created-cum.png')
+    plotDfTime(cDatesFrame, 'date', 'freqCum', xLabel, yLabel, yearMin, yearMax, imgCreatedCum)
+
+    mdString = '\n\n## Created dates\n\n'
+    mdString += '![](./img/' + os.path.basename(imgCreated) + ')'
+    mdString += '\n\n## Created dates (cumulative)\n\n'
+    mdString += '![](./img/' + os.path.basename(imgCreatedCum) + ')'
+
+    return mdString
+
 
 def reportPublicationDates(publicationDates):
     """Report publication dates info"""
-    pubDates = []
-    for publicationDate in publicationDates:
-        pubDates.append(datetime.date.fromisoformat(publicationDate))
-    print(pubDates)
 
+    # Analyse publication dates
+    pDatesFrame, yearMin, yearMax = frequenciesByMonth(publicationDates)
+
+    # Export data frame to a CSV file
+    pDatesFrame.to_csv(os.path.join(config.dirCSV, 'publicationDates.csv'), encoding='utf-8', index=False)
+
+    # Plot frequencies
+    xLabel = 'Publication date'
+    yLabel = 'Count'
+    imgPub = os.path.join(config.dirImg, 'publications-published.png')
+    plotDfTime(pDatesFrame, 'date', 'freq', xLabel, yLabel, yearMin, yearMax, imgPub)
+
+    # Plot cumulative frequencies
+    xLabel = 'Publication date'
+    yLabel = 'Count (cumulative)'
+    imgPubCum = os.path.join(config.dirImg, 'publications-published-cum.png')
+    plotDfTime(pDatesFrame, 'date', 'freqCum', xLabel, yLabel, yearMin, yearMax, imgPubCum)
+
+    mdString = '\n\n## Publication dates\n\n'
+    mdString += '![](./img/' + os.path.basename(imgPub) + ')'
+    mdString += '\n\n## Publication dates (cumulative)\n\n'
+    mdString += '![](./img/' + os.path.basename(imgPubCum) + ')'
+
+    return mdString
 
 def report(fileIn):
     """Create report from JSON file"""
@@ -259,24 +309,10 @@ def report(fileIn):
         sys.stderr.write("Cannot copy style sheet\n")
         sys.exit()
 
-    # Initialize empty string for Markdown output
-    reportString = ""
-
     # Read JSON file
     with open(fileIn, 'r') as f:
         dataIn = json.load(f)
 
-    # Report aggregated statistics
-    aggregations = dataIn["aggregations"]
-    mdString = reportAccessRights(aggregations)
-    reportString += mdString
-    mdString = reportFileTypes(aggregations)
-    reportString += mdString
-    mdString = reportKeywords(aggregations)
-    reportString += mdString
-    mdString = reportPublicationTypes(aggregations)
-    reportString += mdString
- 
     # Report detailed statistics from individual hits
     hits = dataIn["hits"]["hits"]
     createdDates = []
@@ -289,6 +325,7 @@ def report(fileIn):
     resourceTypes = []
     resourceSubtypes = []
 
+    # Parse metadata and store interesting bits to lists
     for hit in hits:
         created = hit["created"]
         createdDates.append(created)
@@ -313,17 +350,17 @@ def report(fileIn):
             language = metadata["language"]
             languages.append(language)
         except KeyError:
-            languages.append("N/A")
+            languages.append("unknown")
         try:
             license = metadata["license"]["id"]
             licenses.append(license)
         except KeyError:
-            licenses.append("N/A")
+            licenses.append("unknown")
         try:
             publicationDate = metadata["publication_date"]
             publicationDates.append(publicationDate)
         except KeyError:
-            publicationDates.append("N/A")
+            publicationDates.append("unknown")
         resource_type = metadata["resource_type"]
         
         try:
@@ -337,5 +374,36 @@ def report(fileIn):
         except KeyError:
             pass
 
-    reportCreatedDates(createdDates)
+    # Generate report
+    # Initialize string for Markdown output
+    reportString = '# Zenodo community report\n\n'
+    reportString += 'Created: ' + str(datetime.datetime.now())
+    mdString = reportFileTypes(fileTypes)
+    reportString += mdString
+    mdString = reportAccessRights(accessRights)
+    reportString += mdString
+    mdString = reportKeywords(keyWords)
+    reportString += mdString
+    mdString = reportPublicationLanguages(languages)
+    reportString += mdString
+    mdString = reportPublicationLicenses(licenses)
+    reportString += mdString
+    mdString = reportPublicationTypes(resourceTypes)
+    reportString += mdString
+    mdString = reportPublicationSubtypes(resourceSubtypes)
+    reportString += mdString
+    mdString = reportCreatedDates(createdDates)
+    reportString += mdString
+    mdString = reportPublicationDates(publicationDates)
+    reportString += mdString
 
+    # Open output report (Markdown format) for writing
+    try:
+        reportMD = os.path.join(dirOut, 'report.md')
+        fOut = codecs.open(reportMD, "w", "utf-8")
+    except:
+        sys.stderr.write("Cannot write output report\n")
+        sys.exit()
+
+    fOut.write(reportString)
+    fOut.close()
