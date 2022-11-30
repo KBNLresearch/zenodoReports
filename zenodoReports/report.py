@@ -95,12 +95,12 @@ def reportFileTypes(fileTypes):
     """Report file type info"""
 
     ftFrame = countByValue(fileTypes, 'fileType')
-    ftMd = dfToMarkdown(ftFrame, headers=['File type', 'Count'])
     prefOut = 'file-types'
     imgOut = os.path.join(config.dirImg, prefOut + '.png')
     csvOut = os.path.join(config.dirCSV, prefOut + '.csv')
     # Group less common file types to prevent cluttered  chart
     ftReduced = reduceCategories(ftFrame, 8)
+    ftMd = dfToMarkdown(ftReduced, headers=['File type', 'Count'])
     plotDfPie(ftReduced, 'frequency', imgOut)
     ftFrame.to_csv(csvOut, encoding='utf-8', index=True)
     mdString = '\n\n## File types\n\n'
@@ -115,12 +115,12 @@ def reportKeywords(keywords):
     """Report keyword info"""
 
     kwFrame = countByValue(keywords, 'keyword')
-    kwMd = dfToMarkdown(kwFrame, headers=['Keyword', 'Count'])
     prefOut = 'keywords'
     imgOut = os.path.join(config.dirImg, prefOut + '.png')
     csvOut = os.path.join(config.dirCSV, prefOut + '.csv')
     # Group less common keywords to prevent cluttered  chart
     kwReduced = reduceCategories(kwFrame, 8)
+    kwMd = dfToMarkdown(kwReduced, headers=['Keyword', 'Count'])
     plotDfPie(kwReduced, 'frequency', imgOut)
     kwFrame.to_csv(csvOut, encoding='utf-8', index=True)
     mdString = '\n\n## Keywords\n\n'
