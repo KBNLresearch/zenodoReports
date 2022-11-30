@@ -62,12 +62,13 @@ def  reduceCategories(dataFrame, categories):
     return dfOut
 
 
-def countByValue(listIn):
+def countByValue(listIn, varName):
     """Report frequencies for values in a list"""
 
     vCount = Counter(listIn)
     vFrame = pd.DataFrame.from_dict(vCount, orient='index', columns=['frequency'])
     vFrame.sort_values(by='frequency', ascending=False, inplace=True)
+    vFrame = vFrame.rename_axis(index=varName)
 
     return vFrame
 
@@ -75,13 +76,17 @@ def countByValue(listIn):
 def reportAccessRights(accessRights):
     """Report access rights info"""
 
-    arFrame = countByValue(accessRights)
+    arFrame = countByValue(accessRights, 'accessType')
     arMd = dfToMarkdown(arFrame, headers=['Access type', 'Count'])
-    imgOut = os.path.join(config.dirImg, 'access-rights.png')
+    prefOut = 'access-rights'
+    imgOut = os.path.join(config.dirImg, prefOut + '.png')
+    csvOut = os.path.join(config.dirCSV, prefOut + '.csv')
     plotDfPie(arFrame, 'frequency', imgOut)
+    arFrame.to_csv(csvOut, encoding='utf-8', index=True)
     mdString = '\n\n## Access rights\n\n'
     mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += arMd
+    mdString += '\n\n[Download data as CSV](./csv/' + os.path.basename(csvOut) + ')\n\n'
 
     return mdString
 
@@ -89,19 +94,19 @@ def reportAccessRights(accessRights):
 def reportFileTypes(fileTypes):
     """Report file type info"""
 
-    ftFrame = countByValue(fileTypes)
+    ftFrame = countByValue(fileTypes, 'fileType')
     ftMd = dfToMarkdown(ftFrame, headers=['File type', 'Count'])
-    imgOut = os.path.join(config.dirImg, 'filetypes.png')
-
+    prefOut = 'file-types'
+    imgOut = os.path.join(config.dirImg, prefOut + '.png')
+    csvOut = os.path.join(config.dirCSV, prefOut + '.csv')
     # Group less common file types to prevent cluttered  chart
     ftReduced = reduceCategories(ftFrame, 8)
-
-    # Plot
     plotDfPie(ftReduced, 'frequency', imgOut)
-
+    ftFrame.to_csv(csvOut, encoding='utf-8', index=True)
     mdString = '\n\n## File types\n\n'
     mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += ftMd
+    mdString += '\n\n[Download data as CSV](./csv/' + os.path.basename(csvOut) + ')\n\n'
 
     return mdString
 
@@ -109,18 +114,19 @@ def reportFileTypes(fileTypes):
 def reportKeywords(keywords):
     """Report keyword info"""
 
-    kwFrame = countByValue(keywords)
+    kwFrame = countByValue(keywords, 'keyword')
     kwMd = dfToMarkdown(kwFrame, headers=['Keyword', 'Count'])
-    imgOut = os.path.join(config.dirImg, 'keywords.png')
-
+    prefOut = 'keywords'
+    imgOut = os.path.join(config.dirImg, prefOut + '.png')
+    csvOut = os.path.join(config.dirCSV, prefOut + '.csv')
     # Group less common keywords to prevent cluttered  chart
     kwReduced = reduceCategories(kwFrame, 8)
-
-    # Plot
     plotDfPie(kwReduced, 'frequency', imgOut)
+    kwFrame.to_csv(csvOut, encoding='utf-8', index=True)
     mdString = '\n\n## Keywords\n\n'
     mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += kwMd
+    mdString += '\n\n[Download data as CSV](./csv/' + os.path.basename(csvOut) + ')\n\n'
 
     return mdString
 
@@ -128,13 +134,17 @@ def reportKeywords(keywords):
 def reportPublicationTypes(publicationTypes):
     """Report publication type info"""
 
-    pTypeFrame = countByValue(publicationTypes)
+    pTypeFrame = countByValue(publicationTypes, 'pubType')
     pTypeMd = dfToMarkdown(pTypeFrame, headers=['Publication type', 'Count'])
-    imgOut = os.path.join(config.dirImg, 'publication-types.png')
+    prefOut = 'publication-types'
+    imgOut = os.path.join(config.dirImg, prefOut + '.png')
+    csvOut = os.path.join(config.dirCSV, prefOut + '.csv')
     plotDfPie(pTypeFrame, 'frequency', imgOut)
+    pTypeFrame.to_csv(csvOut, encoding='utf-8', index=True)
     mdString = '\n\n## Publication types\n\n'
     mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += pTypeMd
+    mdString += '\n\n[Download data as CSV](./csv/' + os.path.basename(csvOut) + ')\n\n'
 
     return mdString
 
@@ -142,13 +152,17 @@ def reportPublicationTypes(publicationTypes):
 def reportPublicationSubtypes(publicationSubtypes):
     """Report publication subtype info"""
 
-    sTypeFrame = countByValue(publicationSubtypes)
+    sTypeFrame = countByValue(publicationSubtypes, 'pubSubType')
     sTypeMd = dfToMarkdown(sTypeFrame, headers=['Publication subtype', 'Count'])
-    imgOut = os.path.join(config.dirImg, 'publication-subtypes.png')
+    prefOut = 'publication-subtypes'
+    imgOut = os.path.join(config.dirImg, prefOut + '.png')
+    csvOut = os.path.join(config.dirCSV, prefOut + '.csv')
     plotDfPie(sTypeFrame, 'frequency', imgOut)
+    sTypeFrame.to_csv(csvOut, encoding='utf-8', index=True)
     mdString = '\n\n## Publication subtypes\n\n'
     mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += sTypeMd
+    mdString += '\n\n[Download data as CSV](./csv/' + os.path.basename(csvOut) + ')\n\n'
 
     return mdString
 
@@ -156,13 +170,17 @@ def reportPublicationSubtypes(publicationSubtypes):
 def reportPublicationLanguages(publicationLanguages):
     """Report publication language info"""
 
-    lFrame = countByValue(publicationLanguages)
+    lFrame = countByValue(publicationLanguages, 'language')
     lMd = dfToMarkdown(lFrame, headers=['Publication language', 'Count'])
-    imgOut = os.path.join(config.dirImg, 'languages.png')
+    prefOut = 'languages'
+    imgOut = os.path.join(config.dirImg, prefOut + '.png')
+    csvOut = os.path.join(config.dirCSV, prefOut + '.csv')
     plotDfPie(lFrame, 'frequency', imgOut)
+    lFrame.to_csv(csvOut, encoding='utf-8', index=True)
     mdString = '\n\n## Publication languages\n\n'
     mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += lMd
+    mdString += '\n\n[Download data as CSV](./csv/' + os.path.basename(csvOut) + ')\n\n'
 
     return mdString
 
@@ -170,13 +188,17 @@ def reportPublicationLanguages(publicationLanguages):
 def reportPublicationLicenses(publicationLicenses):
     """Report publication license info"""
 
-    licFrame = countByValue(publicationLicenses)
+    licFrame = countByValue(publicationLicenses, 'language')
     licMd = dfToMarkdown(licFrame, headers=['Publication license', 'Count'])
-    imgOut = os.path.join(config.dirImg, 'licenses.png')
+    prefOut = 'licenses'
+    imgOut = os.path.join(config.dirImg, prefOut + '.png')
+    csvOut = os.path.join(config.dirCSV, prefOut + '.csv')
     plotDfPie(licFrame, 'frequency', imgOut)
+    licFrame.to_csv(csvOut, encoding='utf-8', index=True)
     mdString = '\n\n## Publication licenses\n\n'
     mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += licMd
+    mdString += '\n\n[Download data as CSV](./csv/' + os.path.basename(csvOut) + ')\n\n'
 
     return mdString
 
@@ -290,7 +312,8 @@ def reportCreatedDates(createdDates):
     cDatesFrame, yearMin, yearMax = frequenciesByMonth(createdDates)
 
     # Export data frame to a CSV file
-    cDatesFrame.to_csv(os.path.join(config.dirCSV, 'createdDates.csv'), encoding='utf-8', index=False)
+    csvOut = os.path.join(config.dirCSV, 'created-dates.csv')
+    cDatesFrame.to_csv(csvOut, encoding='utf-8', index=False)
 
     # Plot frequencies
     xLabel = 'Created date'
@@ -308,6 +331,7 @@ def reportCreatedDates(createdDates):
     mdString += '![](./img/' + os.path.basename(imgCreated) + ')'
     mdString += '\n\n## Created dates (cumulative)\n\n'
     mdString += '![](./img/' + os.path.basename(imgCreatedCum) + ')'
+    mdString += '\n\n[Download data as CSV](./csv/' + os.path.basename(csvOut) + ')\n\n'
 
     return mdString
 
