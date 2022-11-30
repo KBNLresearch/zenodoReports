@@ -35,23 +35,6 @@ def dfToMarkdown(dataframe, headers='keys'):
     return mdOut
 
 
-def iterateAggregation(aggregation):
-    """Iterate over aggregation elements and return output table as list"""
-    buckets = aggregation["buckets"]
-    countOther = aggregation["sum_other_doc_count"]
-
-    outTable = []
-
-    for bucket in buckets:
-        doc_count = bucket["doc_count"]
-        key = bucket["key"]
-        outTable.append([key, doc_count])
-
-    outTable.append(['other', countOther])
-
-    return outTable
-
-
 def countByValue(listIn):
     """Report frequencies for values in a list"""
 
@@ -67,8 +50,12 @@ def reportAccessRights(accessRights):
 
     arFrame = countByValue(accessRights)
     arMd = dfToMarkdown(arFrame, headers=['Access type', 'Count'])
+    imgOut = os.path.join(config.dirImg, 'access-rights.png')
+    plotDfPie(arFrame, 'frequency', imgOut)
     mdString = '\n\n## Access rights\n\n'
     mdString += arMd
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
+
     return mdString
 
 
@@ -77,8 +64,12 @@ def reportFileTypes(fileTypes):
 
     ftFrame = countByValue(fileTypes)
     ftMd = dfToMarkdown(ftFrame, headers=['File type', 'Count'])
+    imgOut = os.path.join(config.dirImg, 'filetypes.png')
+    plotDfPie(ftFrame, 'frequency', imgOut)
     mdString = '\n\n## File types\n\n'
     mdString += ftMd
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
+
     return mdString
 
 
@@ -87,8 +78,12 @@ def reportKeywords(keywords):
 
     kwFrame = countByValue(keywords)
     kwMd = dfToMarkdown(kwFrame, headers=['Keyword', 'Count'])
+    imgOut = os.path.join(config.dirImg, 'keywords.png')
+    plotDfPie(kwFrame, 'frequency', imgOut)
     mdString = '\n\n## Keywords\n\n'
     mdString += kwMd
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
+
     return mdString
 
 
@@ -97,8 +92,12 @@ def reportPublicationTypes(publicationTypes):
 
     pTypeFrame = countByValue(publicationTypes)
     pTypeMd = dfToMarkdown(pTypeFrame, headers=['Publication type', 'Count'])
+    imgOut = os.path.join(config.dirImg, 'publication-types.png')
+    plotDfPie(pTypeFrame, 'frequency', imgOut)
     mdString = '\n\n## Publication types\n\n'
     mdString += pTypeMd
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
+
     return mdString
 
 
@@ -107,28 +106,40 @@ def reportPublicationSubtypes(publicationSubtypes):
 
     sTypeFrame = countByValue(publicationSubtypes)
     sTypeMd = dfToMarkdown(sTypeFrame, headers=['Publication subtype', 'Count'])
+    imgOut = os.path.join(config.dirImg, 'publication-subtypes.png')
+    plotDfPie(sTypeFrame, 'frequency', imgOut)
     mdString = '\n\n## Publication subtypes\n\n'
     mdString += sTypeMd
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
+
     return mdString
 
 
 def reportPublicationLanguages(publicationLanguages):
     """Report publication language info"""
 
-    lTypeFrame = countByValue(publicationLanguages)
-    lTypeMd = dfToMarkdown(lTypeFrame, headers=['Publication language', 'Count'])
+    lFrame = countByValue(publicationLanguages)
+    lMd = dfToMarkdown(lFrame, headers=['Publication language', 'Count'])
+    imgOut = os.path.join(config.dirImg, 'languages.png')
+    plotDfPie(lFrame, 'frequency', imgOut)
     mdString = '\n\n## Publication languages\n\n'
-    mdString += lTypeMd
+    mdString += lMd
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
+
     return mdString
 
 
 def reportPublicationLicenses(publicationLicenses):
     """Report publication license info"""
 
-    licTypeFrame = countByValue(publicationLicenses)
-    licTypeMd = dfToMarkdown(licTypeFrame, headers=['Publication license', 'Count'])
+    licFrame = countByValue(publicationLicenses)
+    licMd = dfToMarkdown(licFrame, headers=['Publication license', 'Count'])
+    imgOut = os.path.join(config.dirImg, 'licenses.png')
+    plotDfPie(licFrame, 'frequency', imgOut)
     mdString = '\n\n## Publication licenses\n\n'
-    mdString += licTypeMd
+    mdString += licMd
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
+
     return mdString
 
 
@@ -191,6 +202,17 @@ def frequenciesByMonth(datesIn):
                                 'freqCum': dateCountsCum})
 
     return datesFrame, yearMin, yearMax
+
+
+def plotDfPie(dataFrame, yCol, imageOut):
+    """Plot data frame column as pie chart"""
+
+    myPlot = dataFrame.plot(kind='pie',
+                            y=yCol,
+                            figsize=(8,8))
+    myPlot.yaxis.set_visible(False)
+    fig = myPlot.get_figure()
+    fig.savefig(imageOut)
 
 
 def plotDfTime(dataFrame, xCol, yCol, xLabel, yLabel, yearMin, yearMax, imageOut):
