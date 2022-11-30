@@ -35,6 +35,28 @@ def dfToMarkdown(dataframe, headers='keys'):
     return mdOut
 
 
+def  reduceCategories(dataFrame, categories):
+    """Returns version of dataframe where all categories
+    outside of top number are grouped as 'other' category
+    Adapted from https://stackoverflow.com/a/48589225/1209004"""
+
+    # Top categories
+    dfTop = dataFrame[:categories].copy()
+
+    # Row with grouped remaining categories
+    dfOther = pd.DataFrame(data = {
+              'frequency' : [dataFrame['frequency'][categories:].sum()]
+    })
+
+    # Change index value from '0' to 'other'
+    dfOther.rename(index={0:'other'},inplace=True)
+
+    # Combine both into new dataframe
+    dfOut = pd.concat([dfTop, dfOther])
+
+    return dfOut
+
+
 def countByValue(listIn):
     """Report frequencies for values in a list"""
 
@@ -53,8 +75,8 @@ def reportAccessRights(accessRights):
     imgOut = os.path.join(config.dirImg, 'access-rights.png')
     plotDfPie(arFrame, 'frequency', imgOut)
     mdString = '\n\n## Access rights\n\n'
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += arMd
-    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
 
     return mdString
 
@@ -65,10 +87,16 @@ def reportFileTypes(fileTypes):
     ftFrame = countByValue(fileTypes)
     ftMd = dfToMarkdown(ftFrame, headers=['File type', 'Count'])
     imgOut = os.path.join(config.dirImg, 'filetypes.png')
-    plotDfPie(ftFrame, 'frequency', imgOut)
+
+    # Group less common file types to prevent cluttered  chart
+    ftReduced = reduceCategories(ftFrame, 8)
+
+    # Plot
+    plotDfPie(ftReduced, 'frequency', imgOut)
+
     mdString = '\n\n## File types\n\n'
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += ftMd
-    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
 
     return mdString
 
@@ -79,10 +107,15 @@ def reportKeywords(keywords):
     kwFrame = countByValue(keywords)
     kwMd = dfToMarkdown(kwFrame, headers=['Keyword', 'Count'])
     imgOut = os.path.join(config.dirImg, 'keywords.png')
-    plotDfPie(kwFrame, 'frequency', imgOut)
+
+    # Group less common keywords to prevent cluttered  chart
+    kwReduced = reduceCategories(kwFrame, 8)
+
+    # Plot
+    plotDfPie(kwReduced, 'frequency', imgOut)
     mdString = '\n\n## Keywords\n\n'
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += kwMd
-    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
 
     return mdString
 
@@ -95,8 +128,8 @@ def reportPublicationTypes(publicationTypes):
     imgOut = os.path.join(config.dirImg, 'publication-types.png')
     plotDfPie(pTypeFrame, 'frequency', imgOut)
     mdString = '\n\n## Publication types\n\n'
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += pTypeMd
-    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
 
     return mdString
 
@@ -109,8 +142,8 @@ def reportPublicationSubtypes(publicationSubtypes):
     imgOut = os.path.join(config.dirImg, 'publication-subtypes.png')
     plotDfPie(sTypeFrame, 'frequency', imgOut)
     mdString = '\n\n## Publication subtypes\n\n'
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += sTypeMd
-    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
 
     return mdString
 
@@ -123,8 +156,8 @@ def reportPublicationLanguages(publicationLanguages):
     imgOut = os.path.join(config.dirImg, 'languages.png')
     plotDfPie(lFrame, 'frequency', imgOut)
     mdString = '\n\n## Publication languages\n\n'
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += lMd
-    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
 
     return mdString
 
@@ -137,8 +170,8 @@ def reportPublicationLicenses(publicationLicenses):
     imgOut = os.path.join(config.dirImg, 'licenses.png')
     plotDfPie(licFrame, 'frequency', imgOut)
     mdString = '\n\n## Publication licenses\n\n'
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
     mdString += licMd
-    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')'
 
     return mdString
 
@@ -209,7 +242,7 @@ def plotDfPie(dataFrame, yCol, imageOut):
 
     myPlot = dataFrame.plot(kind='pie',
                             y=yCol,
-                            figsize=(8,8))
+                            figsize=(10,8))
     myPlot.yaxis.set_visible(False)
     fig = myPlot.get_figure()
     fig.savefig(imageOut)
@@ -404,11 +437,11 @@ def report(fileIn):
     reportString += mdString
     mdString = reportAccessRights(accessRights)
     reportString += mdString
+    mdString = reportPublicationLicenses(licenses)
+    reportString += mdString
     mdString = reportKeywords(keyWords)
     reportString += mdString
     mdString = reportPublicationLanguages(languages)
-    reportString += mdString
-    mdString = reportPublicationLicenses(licenses)
     reportString += mdString
     mdString = reportPublicationTypes(resourceTypes)
     reportString += mdString
@@ -416,8 +449,8 @@ def report(fileIn):
     reportString += mdString
     mdString = reportCreatedDates(createdDates)
     reportString += mdString
-    mdString = reportPublicationDates(publicationDates)
-    reportString += mdString
+    #mdString = reportPublicationDates(publicationDates)
+    #reportString += mdString
 
     # Open output report (Markdown format) for writing
     try:
