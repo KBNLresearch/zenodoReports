@@ -202,96 +202,35 @@ def plotDfTime(dataFrame, xCol, yCol, xLabel, yLabel, yearMin, yearMax, imageOut
     fig.savefig(imageOut)
 
 
-def reportCreatedDates(createdDates):
-    """Report created dates info"""
+def reportDates(dates, prefixOut, xLabel):
+    """Report dates info"""
 
-    # Analyse created dates
-    cDatesFrame, yearMin, yearMax = frequenciesByMonth(createdDates)
+    # Analyse dates
+    dfDates, yearMin, yearMax = frequenciesByMonth(dates)
+
+    # Name of output image and CSV file
+    imgOut = os.path.join(config.dirImg, prefixOut + '.png')
+    imgOutCum = os.path.join(config.dirImg, prefixOut + '-cum.png')
+    csvOut = os.path.join(config.dirCSV, prefixOut + '.csv')
 
     # Export data frame to a CSV file
-    csvOut = os.path.join(config.dirCSV, 'created-dates.csv')
-    cDatesFrame.to_csv(csvOut, encoding='utf-8', index=False)
+    dfDates.to_csv(csvOut, encoding='utf-8', index=False)
+
+    yLabel = 'Count'
 
     # Plot frequencies
-    xLabel = 'Created date'
-    yLabel = 'Count'
-    imgCreated = os.path.join(config.dirImg, 'publications-created.png')
-    plotDfTime(cDatesFrame, 'date', 'freq', xLabel, yLabel, yearMin, yearMax, imgCreated)
+    plotDfTime(dfDates, 'date', 'freq', xLabel, yLabel, yearMin, yearMax, imgOut)
 
     # Plot cumulative frequencies
-    xLabel = 'Created date'
-    yLabel = 'Count (cumulative)'
-    imgCreatedCum = os.path.join(config.dirImg, 'publications-created-cum.png')
-    plotDfTime(cDatesFrame, 'date', 'freqCum', xLabel, yLabel, yearMin, yearMax, imgCreatedCum)
+    plotDfTime(dfDates, 'date', 'freqCum', xLabel, yLabel + ' (cumulative)', yearMin, yearMax, imgOutCum)
 
-    mdString = '### Created dates\n\n'
-    mdString += '![](./img/' + os.path.basename(imgCreated) + ')'
-    mdString += '\n\n### Cumulative\n\n'
-    mdString += '![](./img/' + os.path.basename(imgCreatedCum) + ')'
+    mdString = '![](./img/' + os.path.basename(imgOut) + ')'
+    mdString += '\n\n'
+    mdString += '![](./img/' + os.path.basename(imgOutCum) + ')'
     mdString += '\n\n[Download data as CSV](./csv/' + os.path.basename(csvOut) + ')\n\n'
 
     return mdString
 
-
-def reportCreatedDatesReduced(createdDates):
-    """Report created dates info, excluding HTR-transcriptions from
-    Entangled Histories project"""
-
-    # Analyse created dates
-    cDatesFrame, yearMin, yearMax = frequenciesByMonth(createdDates)
-
-    # Export data frame to a CSV file
-    csvOut = os.path.join(config.dirCSV, 'created-dates-reduced.csv')
-    cDatesFrame.to_csv(csvOut, encoding='utf-8', index=False)
-
-    # Plot frequencies
-    xLabel = 'Created date'
-    yLabel = 'Count'
-    imgCreated = os.path.join(config.dirImg, 'publications-created-reduced.png')
-    plotDfTime(cDatesFrame, 'date', 'freq', xLabel, yLabel, yearMin, yearMax, imgCreated)
-
-    # Plot cumulative frequencies
-    xLabel = 'Created date'
-    yLabel = 'Count (cumulative)'
-    imgCreatedCum = os.path.join(config.dirImg, 'publications-created-cum-reduced.png')
-    plotDfTime(cDatesFrame, 'date', 'freqCum', xLabel, yLabel, yearMin, yearMax, imgCreatedCum)
-
-    mdString = '### Created dates\n\n'
-    mdString += '![](./img/' + os.path.basename(imgCreated) + ')'
-    mdString += '\n\n### Cumulative\n\n'
-    mdString += '![](./img/' + os.path.basename(imgCreatedCum) + ')'
-    mdString += '\n\n[Download data as CSV](./csv/' + os.path.basename(csvOut) + ')\n\n'
-
-    return mdString
-
-
-def reportPublicationDates(publicationDates):
-    """Report publication dates info"""
-
-    # Analyse publication dates
-    pDatesFrame, yearMin, yearMax = frequenciesByMonth(publicationDates)
-
-    # Export data frame to a CSV file
-    pDatesFrame.to_csv(os.path.join(config.dirCSV, 'publicationDates.csv'), encoding='utf-8', index=False)
-
-    # Plot frequencies
-    xLabel = 'Publication date'
-    yLabel = 'Count'
-    imgPub = os.path.join(config.dirImg, 'publications-published.png')
-    plotDfTime(pDatesFrame, 'date', 'freq', xLabel, yLabel, yearMin, yearMax, imgPub)
-
-    # Plot cumulative frequencies
-    xLabel = 'Publication date'
-    yLabel = 'Count (cumulative)'
-    imgPubCum = os.path.join(config.dirImg, 'publications-published-cum.png')
-    plotDfTime(pDatesFrame, 'date', 'freqCum', xLabel, yLabel, yearMin, yearMax, imgPubCum)
-
-    mdString = '\n\n## Publication dates\n\n'
-    mdString += '![](./img/' + os.path.basename(imgPub) + ')'
-    mdString += '\n\n## Publication dates (cumulative)\n\n'
-    mdString += '![](./img/' + os.path.basename(imgPubCum) + ')'
-
-    return mdString
 
 def report(fileIn):
     """Create report from JSON file"""
@@ -446,11 +385,11 @@ def report(fileIn):
     reportString += mdString
 
     reportString += '## Created dates\n\n'
-    mdString = reportCreatedDates(createdDates)
+    mdString = reportDates(createdDates, 'created', 'Created date')
     reportString += mdString
     
     reportString += '## Created dates (excluding EH transcriptions)\n\n'
-    mdString = reportCreatedDatesReduced(createdDatesReduced)
+    mdString = reportDates(createdDatesReduced, 'created-noeh', 'Created date')
     reportString += mdString
 
     # Open output report (Markdown format) for writing
