@@ -111,6 +111,27 @@ def reportFileTypes(fileTypes):
     return mdString
 
 
+def reportAuthors(authors):
+    """Report author info"""
+
+    auFrame = countByValue(authors, 'author')
+    prefOut = 'authors'
+    imgOut = os.path.join(config.dirImg, prefOut + '.png')
+    csvOut = os.path.join(config.dirCSV, prefOut + '.csv')
+    # Group less common values prevent cluttered  chart
+    auReduced = reduceCategories(auFrame, 8)
+    auMd = dfToMarkdown(auReduced, headers=['Author', 'Count'])
+    plotDfPie(auReduced, 'frequency', imgOut)
+    auFrame.to_csv(csvOut, encoding='utf-8', index=True)
+    mdString = '\n\n## Authors\n\n'
+    mdString += '\n\n![](./img/' + os.path.basename(imgOut) + ')\n\n'
+    mdString += auMd
+    mdString += '\n\n[Download data as CSV](./csv/' + os.path.basename(csvOut) + ')\n\n'
+
+    return mdString
+
+
+
 def reportKeywords(keywords):
     """Report keyword info"""
 
@@ -336,6 +357,38 @@ def reportCreatedDates(createdDates):
     return mdString
 
 
+def reportCreatedDatesReduced(createdDates):
+    """Report created dates info, excluding HTR-transcriptions from
+    Entangled Histories project"""
+
+    # Analyse created dates
+    cDatesFrame, yearMin, yearMax = frequenciesByMonth(createdDates)
+
+    # Export data frame to a CSV file
+    csvOut = os.path.join(config.dirCSV, 'created-dates-reduced.csv')
+    cDatesFrame.to_csv(csvOut, encoding='utf-8', index=False)
+
+    # Plot frequencies
+    xLabel = 'Created date'
+    yLabel = 'Count'
+    imgCreated = os.path.join(config.dirImg, 'publications-created-reduced.png')
+    plotDfTime(cDatesFrame, 'date', 'freq', xLabel, yLabel, yearMin, yearMax, imgCreated)
+
+    # Plot cumulative frequencies
+    xLabel = 'Created date'
+    yLabel = 'Count (cumulative)'
+    imgCreatedCum = os.path.join(config.dirImg, 'publications-created-cum-reduced.png')
+    plotDfTime(cDatesFrame, 'date', 'freqCum', xLabel, yLabel, yearMin, yearMax, imgCreatedCum)
+
+    mdString = '\n\n## Created dates (excluding Entangled Histories transcriptions)\n\n'
+    mdString += '![](./img/' + os.path.basename(imgCreated) + ')'
+    mdString += '\n\n## Created dates (cumulative) (excluding Entangled Histories transcriptions)\n\n'
+    mdString += '![](./img/' + os.path.basename(imgCreatedCum) + ')'
+    mdString += '\n\n[Download data as CSV](./csv/' + os.path.basename(csvOut) + ')\n\n'
+
+    return mdString
+
+
 def reportPublicationDates(publicationDates):
     """Report publication dates info"""
 
@@ -400,8 +453,11 @@ def report(fileIn):
     # Report detailed statistics from individual hits
     hits = dataIn["hits"]["hits"]
     createdDates = []
+    # TEST - created dates of all "Entangled Histories" transcriptions
+    createdDatesEH = []
     fileTypes = []
     accessRights = []
+    authors = []
     keyWords = []
     languages = []
     licenses = []
@@ -431,6 +487,12 @@ def report(fileIn):
         for keyword in keywords:
             keyWords.append(keyword)
         try:
+            creators = metadata["creators"]
+        except KeyError:
+            creators = []
+        for creator in creators:
+            authors.append(creator["name"])
+        try:
             language = metadata["language"]
             languages.append(language)
         except KeyError:
@@ -458,6 +520,17 @@ def report(fileIn):
         except KeyError:
             pass
 
+        if "Entangled Histories" in keywords and "HTR-transcriptions" in keywords:
+            # TEST - add created date of "Entangled Histories" transcription
+            createdDatesEH.append(created)
+
+    # TEST - list of all createdDates that are not "Entangled Histories" transcriptions
+    createdDatesReduced = [item for item in createdDates if item not in createdDatesEH]  
+
+    print(len(createdDates))
+    print(len(createdDatesEH))
+    print(len(createdDatesReduced))
+
     # Generate report
     # Initialize string for Markdown output
     reportString = '# Zenodo community report\n\n'
@@ -467,6 +540,8 @@ def report(fileIn):
     mdString = reportAccessRights(accessRights)
     reportString += mdString
     mdString = reportPublicationLicenses(licenses)
+    reportString += mdString
+    mdString = reportAuthors(authors)
     reportString += mdString
     mdString = reportKeywords(keyWords)
     reportString += mdString
@@ -478,6 +553,8 @@ def report(fileIn):
     reportString += mdString
     mdString = reportCreatedDates(createdDates)
     reportString += mdString
+    mdString = reportCreatedDatesReduced(createdDatesReduced)
+    reportString += mdString   
     #mdString = reportPublicationDates(publicationDates)
     #reportString += mdString
 
