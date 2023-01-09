@@ -1,10 +1,11 @@
-pubSubType,frequency
-article,78
+subtype,frequency
+article,79
 report,42
 section,12
 other,11
 conferencepaper,8
 book,7
+technicalnote,4
 workingpaper,2
 deliverable,2
 proposal,1
