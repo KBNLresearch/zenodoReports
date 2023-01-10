@@ -39,7 +39,7 @@ def parseCommandLine():
     parser_fetch.add_argument('--maxrecords', '-m',
                                action='store',
                                dest='maxRecords',
-                               default='500',
+                               default='all',
                                help='maximum number of records to fetch')
 
     parser_report = subparsers.add_parser('report',
