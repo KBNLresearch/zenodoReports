@@ -2,8 +2,7 @@
 
 ## What it does
 
-Fetch metadata and generate reports for a Zenodo community.
-
+Fetch metadata and generate reports for a Zenodo community. See an example report [here](./examples/report/report.md).
 
 ## Installation
 
@@ -36,8 +35,8 @@ zenodoReports fetch [-h] [--maxrecords MAXRECORDS] [--info]
 
 Positional arguments:
 
-- accessToken: Zenodo access token
-- communityID: community identifier
+- accessToken: Zenodo access token. You can create an access token [here](https://zenodo.org/account/settings/applications/tokens/new/).
+- communityID: community identifier (e.g. "kbnl")
 
 Optional arguments:
  
@@ -60,7 +59,6 @@ Positional arguments:
 Optional arguments:
 
 - -h, --help: show help message and exit
-
 
 ## License
 
