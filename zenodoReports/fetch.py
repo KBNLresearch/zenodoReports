@@ -9,7 +9,7 @@ import datetime
 
 def fetchMeta(ACCESS_TOKEN, communityID, maxRecords, infoFlag):
 
-    # First fetch 1 records to establish total number of records
+    # First fetch 1 record to establish total number of records
     response = requests.get('https://zenodo.org/api/records',
                             params={'access_token': ACCESS_TOKEN,
                             'communities': communityID,
