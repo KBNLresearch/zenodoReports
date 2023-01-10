@@ -4,6 +4,27 @@
 
 Fetch metadata and generate reports for a Zenodo community.
 
+
+## Installation
+
+1. Clone this repository:
+
+    ```
+    git clone https://github.com/KBNLresearch/zenodoReports.git
+    ```
+
+2. Set working directory to repository root dir:
+
+    ```
+    cd zenodoReports
+    ```
+
+3. For a user install, run the below command:
+
+    ```
+    python3 setup.py install --user
+    ```
+
 ## Fetch metadata
 
 Usage:
