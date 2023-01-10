@@ -40,7 +40,13 @@ def parseCommandLine():
                                action='store',
                                dest='maxRecords',
                                default='all',
-                               help='maximum number of records to fetch')
+                               help='maximum number of records to fetch (default: fetch all)')
+
+    parser_fetch.add_argument('--info', '-i',
+                               action="store_true",
+                               dest='infoFlag',
+                               default=False,
+                               help="only show number of records in community (don't fetch anything)")
 
     parser_report = subparsers.add_parser('report',
                                          help='generate a report')
@@ -78,7 +84,8 @@ def main():
         accessToken = args.accessToken
         communityID = args.communityID
         maxRecords = args.maxRecords
-        fetch.fetchMeta(accessToken, communityID, maxRecords)
+        infoFlag = args.infoFlag
+        fetch.fetchMeta(accessToken, communityID, maxRecords, infoFlag)
 
     elif action == "report":
         metadataIn = args.metadataIn

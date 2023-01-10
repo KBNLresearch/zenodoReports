@@ -7,7 +7,7 @@ import json
 import requests
 import datetime
 
-def fetchMeta(ACCESS_TOKEN, communityID, maxRecords):
+def fetchMeta(ACCESS_TOKEN, communityID, maxRecords, infoFlag):
 
     # First fetch 1 records to establish total number of records
     response = requests.get('https://zenodo.org/api/records',
@@ -18,19 +18,25 @@ def fetchMeta(ACCESS_TOKEN, communityID, maxRecords):
 
     noRecords = response.json()["hits"]["total"]
 
-    if maxRecords != 'all':
-        noRecords = maxRecords
+    # Print number of records
+    print('Found ' + str(noRecords) + ' records')
 
-    # Fetch all records (or number set by maxRecords)
-    response = requests.get('https://zenodo.org/api/records',
-                            params={'access_token': ACCESS_TOKEN,
-                            'communities': communityID,
-                            'size': noRecords},
-                            timeout=None)
-    thisDateTime = datetime.date.today().isoformat()
+    if not infoFlag:
+        # Fetch all records (or number set by maxRecords)
+        if maxRecords != 'all':
+            noRecords = maxRecords
 
-    fName = communityID + '-' + thisDateTime + '.json'
+        response = requests.get('https://zenodo.org/api/records',
+                                params={'access_token': ACCESS_TOKEN,
+                                'communities': communityID,
+                                'size': noRecords},
+                                timeout=None)
+        thisDateTime = datetime.date.today().isoformat()
 
-    with io.open(fName, 'w', encoding='utf-8') as f:
-        json.dump(response.json(), f)
+        fName = communityID + '-' + thisDateTime + '.json'
+
+        with io.open(fName, 'w', encoding='utf-8') as f:
+            json.dump(response.json(), f)
+    
+        print('Wrote records to file ' + fName)
 
