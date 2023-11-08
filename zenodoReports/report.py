@@ -290,8 +290,11 @@ def report(fileIn):
             # Closed access publications can have no files
             files = []
         for file in files:
-            ftype = file["type"]
-            fileTypes.append(ftype)
+            try:
+                ftype = file["type"]
+                fileTypes.append(ftype)
+            except KeyError:
+                pass
         metadata = hit["metadata"]
         access_right = metadata["access_right"]
         accessRights.append(access_right)
@@ -350,9 +353,9 @@ def report(fileIn):
     reportString += 'Input file: ' + fileIn
     reportString += '\n\n'
 
-    reportString += '## File types\n\n'
-    mdString = reportCategories(fileTypes, 'fileType', 'file-types', 8)
-    reportString += mdString
+    #reportString += '## File types\n\n'
+    #mdString = reportCategories(fileTypes, 'fileType', 'file-types', 8)
+    #reportString += mdString
 
     reportString += '## Access rights\n\n'
     mdString = reportCategories(accessRights, 'accessRight', 'access-rights', 8)
