@@ -50,7 +50,8 @@ setup(name='zenodoReports',
       url='https://github.com/KBNLresearch/zenodoReports',
       download_url='https://github.com/KBNLresearch/zenodoReports/archive/' + \
        find_version('zenodoReports', 'zenodoReports.py') + '.tar.gz',
-      package_data={'zenodoReports': ['*.*'], 'css': ['*.*']},
+      package_data={'zenodoReports': ['*.*',
+                                'css/*.*']},
       zip_safe=False,
       entry_points={'console_scripts': [
           'zenodoReports = zenodoReports.zenodoReports:main',

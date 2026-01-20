@@ -257,6 +257,10 @@ def report(fileIn):
     # Locate package directory
     packageDir = os.path.dirname(os.path.abspath(__file__))
 
+    ##
+    print(packageDir)
+    ##
+
     try:
         cssIn = os.path.join(packageDir, 'css', 'github-markdown.css')
         cssOut = os.path.join(config.dirCSS, 'github-markdown.css')
