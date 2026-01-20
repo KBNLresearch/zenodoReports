@@ -253,12 +253,16 @@ def report(fileIn):
         os.makedirs(config.dirImg)
 
     # Copy style sheet to CSS dir
+
+    # Locate package directory
+    packageDir = os.path.dirname(os.path.abspath(__file__))
+
     try:
-        cssIn = os.path.join(sys.path[0], 'css', 'github-markdown.css')
+        cssIn = os.path.join(packageDir, 'css', 'github-markdown.css')
         cssOut = os.path.join(config.dirCSS, 'github-markdown.css')
         shutil.copyfile(cssIn, cssOut)
     except:
-        sys.stderr.write("Cannot copy style sheet\n")
+        sys.stderr.write("Cannot copy style sheet from installed package\n")
         sys.exit()
 
     # Read JSON file
