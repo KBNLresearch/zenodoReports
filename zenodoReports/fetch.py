@@ -9,16 +9,6 @@ import requests
 import datetime
 
 
-def merge_json_files(file_paths, output_file):
-    merged_data = []
-    for path in file_paths:
-        with open(path, 'r') as file:
-            data = json.load(file)
-            merged_data.append(data)
-    with open(output_file, 'w') as outfile:
-        json.dump(merged_data, outfile)
-
-
 def fetchMeta(ACCESS_TOKEN, communityID, maxRecords, infoFlag):
 
     # Get info about available dumps
