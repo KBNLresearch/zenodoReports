@@ -257,10 +257,6 @@ def report(fileIn):
     # Locate package directory
     packageDir = os.path.dirname(os.path.abspath(__file__))
 
-    ##
-    print(packageDir)
-    ##
-
     try:
         cssIn = os.path.join(packageDir, 'css', 'github-markdown.css')
         cssOut = os.path.join(config.dirCSS, 'github-markdown.css')
@@ -270,8 +266,12 @@ def report(fileIn):
         sys.exit()
 
     # Read JSON file
-    with open(fileIn, 'r') as f:
-        dataIn = json.load(f)
+    try:
+        with open(fileIn, 'r') as f:
+            dataIn = json.load(f)
+    except:
+        sys.stderr.write("Cannot open metadata input file\n")
+        sys.exit()
 
     hits = []
 
