@@ -10,7 +10,7 @@ import argparse
 from . import fetch
 from . import report
 
-__version__ = "0.1.0a1"
+__version__ = "0.1.1"
 
 # Create parser
 parser = argparse.ArgumentParser(
