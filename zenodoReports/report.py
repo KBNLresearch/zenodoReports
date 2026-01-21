@@ -273,8 +273,16 @@ def report(fileIn):
     with open(fileIn, 'r') as f:
         dataIn = json.load(f)
 
-    # Report detailed statistics from individual hits
-    hits = dataIn["hits"]["hits"]
+    hits = []
+
+    ## Number of elements in root
+    noElts = len(dataIn)
+
+    for elt in range(noElts):
+        hitsElt = dataIn[elt]["hits"]["hits"]
+        for hit in hitsElt:
+            hits.append(hit)
+
     createdDates = []
     # TEST - created dates of all "Entangled Histories" transcriptions
     createdDatesEH = []
