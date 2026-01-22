@@ -9,7 +9,7 @@ import requests
 import datetime
 
 
-def fetchMeta(ACCESS_TOKEN, communityID, maxRecords, infoFlag):
+def fetchMeta(ACCESS_TOKEN, communityID, infoFlag):
 
     # Get info about available dumps
     response = requests.get('https://zenodo.org/api/exporter')

@@ -29,7 +29,7 @@ Fetch metadata and generate reports for a Zenodo community. See an example repor
 Usage:
 
 ```
-zenodoReports fetch [-h] [--maxrecords MAXRECORDS] [--info]
+zenodoReports fetch [-h] [--info]
                        accessToken communityID
 ```
 
@@ -41,7 +41,6 @@ Positional arguments:
 Optional arguments:
  
 - -h, --help: show help message and exit
-- --maxrecords MAXRECORDS, -m MAXRECORDS: maximum number of records to fetch (default: fetch all records)
 - --info, -i: only show number of records in community (don't fetch anything)
 
 ## Generate report

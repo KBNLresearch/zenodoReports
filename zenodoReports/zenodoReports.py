@@ -10,7 +10,7 @@ import argparse
 from . import fetch
 from . import report
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 # Create parser
 parser = argparse.ArgumentParser(
@@ -35,12 +35,6 @@ def parseCommandLine():
                                action='store',
                                type=str,
                                help='community identifier')
-
-    parser_fetch.add_argument('--maxrecords', '-m',
-                               action='store',
-                               dest='maxRecords',
-                               default='all',
-                               help='maximum number of records to fetch (default: fetch all)')
 
     parser_fetch.add_argument('--info', '-i',
                                action="store_true",
@@ -83,9 +77,8 @@ def main():
     if action == "fetch":
         accessToken = args.accessToken
         communityID = args.communityID
-        maxRecords = args.maxRecords
         infoFlag = args.infoFlag
-        fetch.fetchMeta(accessToken, communityID, maxRecords, infoFlag)
+        fetch.fetchMeta(accessToken, communityID, infoFlag)
 
     elif action == "report":
         metadataIn = args.metadataIn
