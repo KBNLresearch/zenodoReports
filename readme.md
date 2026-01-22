@@ -2,8 +2,6 @@
 
 ## What it does
 
-test
-
 Fetch metadata and generate reports for a Zenodo community. See an example report [here](./examples/2026/report/report.md).
 
 ## Installation
